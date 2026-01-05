@@ -30,7 +30,7 @@ targetCustomizations:
     #clusterName: saurabh-kubernetes-cluster
     helm:
       valuesFiles:
-        - clusters/saurabh-kubernetes-cluster.yaml
+        - ../clusters/saurabh-kubernetes-cluster.yaml
         - versions/v1.4.0.yaml
 
 
