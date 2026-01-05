@@ -52,29 +52,20 @@ When managing a fleet of Kubernetes clusters, we need to solve several challenge
 ### Why GitOps for Edge at Scale?
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    EDGE CLUSTER MANAGEMENT AT SCALE                     │
-│                                                                         │
-│   Traditional Approach              │    GitOps Approach                │
-│   (Manual/Script-based)             │                                   │
-│                                     │                                   │
-│   ❌ SSH into each cluster          │    ✅ Commit to Git               │
-│   ❌ Run scripts on 1000 nodes      │    ✅ Fleet syncs all clusters    │
-│   ❌ Track changes in spreadsheets  │    ✅ Git history = audit log     │
-│   ❌ Inconsistent state             │    ✅ Guaranteed consistency      │
-│   ❌ Rollback = nightmare           │    ✅ git revert = instant        │
-│   ❌ Who changed what? Unknown      │    ✅ Git blame = accountability  │
-│                                     │                                   │
-│   Time to update 1000 clusters:     │    Time to update 1000 clusters:  │
-│   Hours to Days                     │    Minutes (automatic sync)       │
-└─────────────────────────────────────────────────────────────────────────┘
+Commit to Git
+Fleet syncs all clusters
+Git history = audit log
+Guaranteed consistency
+git revert = instant
+Git blame = accountability
+Time to update 1000 clusters: Minutes (automatic sync)
 ```
 
 **Real-World Edge Scenarios:**
-- 🏪 **Retail**: 500+ store locations, each with its own K3s cluster
-- 🏭 **Manufacturing**: 200+ factory floor edge nodes running ML models
-- 🚚 **Logistics**: 1000+ warehouse clusters with inventory systems
-- 🏥 **Healthcare**: Regional clinics with patient data systems
+- **Retail**: 500+ store locations, each with its own K3s cluster
+- **Manufacturing**: 200+ factory floor edge nodes running ML models
+- **Logistics**: 1000+ warehouse clusters with inventory systems
+- **Healthcare**: Regional clinics with patient data systems
 
 ---
 
@@ -365,13 +356,13 @@ Upgrading applications across multiple clusters requires a controlled approach. 
 │                                                                         │
 │   ┌─────────────────────────────────────────────────────────────────┐  │
 │   │                                                                 │  │
-│   │  Week 1:  pilot-cluster ──────► v1.6.0  ✅                      │  │
+│   │  Week 1:  pilot-cluster ──────► v1.6.0                          │  │
 │   │                                                                 │  │
-│   │  Week 2:  staging-cluster ────► v1.6.0  ✅                      │  │
+│   │  Week 2:  staging-cluster ────► v1.6.0                          │  │
 │   │                                                                 │  │
-│   │  Week 3:  prod-eu-cluster ────► v1.6.0  ✅                      │  │
+│   │  Week 3:  prod-eu-cluster ────► v1.6.0                          │  │
 │   │                                                                 │  │
-│   │  Week 4:  prod-us-cluster ────► v1.6.0  ✅                      │  │
+│   │  Week 4:  prod-us-cluster ────► v1.6.0                          │  │
 │   │                                                                 │  │
 │   └─────────────────────────────────────────────────────────────────┘  │
 │                                                                         │
@@ -534,10 +525,10 @@ This guide presents one approach to multi-cluster GitOps with Fleet. Depending o
 
 Managing multiple Kubernetes clusters doesn't have to be chaotic. With a well-structured GitOps approach:
 
-- ✅ **All configuration is version-controlled** and auditable
-- ✅ **Clusters can have unique configurations** while sharing common defaults
-- ✅ **Upgrades are controlled** through a release train model
-- ✅ **Rollbacks are simple**—just revert a file reference
+- **All configuration is version-controlled** and auditable
+- **Clusters can have unique configurations** while sharing common defaults
+- **Upgrades are controlled** through a release train model
+- **Rollbacks are simple**—just revert a file reference
 
 The separation of concerns between Helm charts (what to deploy) and GitOps configuration (how to deploy it) provides flexibility and maintainability at scale.
 
