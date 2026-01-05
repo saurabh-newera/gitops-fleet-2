@@ -16,8 +16,8 @@ helm:
   values:
     resources:
       limits:
-        cpu: "150m"
-        memory: "158Mi"
+        cpu: "350m"
+        memory: "358Mi"
 
 # Per-cluster customizations
 # Each cluster gets its version-specific + cluster-specific values
@@ -34,8 +34,8 @@ targetCustomizations:
       values:
         resources:
           limits:
-            cpu: "150m"
-            memory: "158Mi"
+            cpu: "180m"
+            memory: "188Mi"
 
 
 # Uncomment when you have infrastructure layer
