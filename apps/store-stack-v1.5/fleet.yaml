@@ -1,0 +1,40 @@
+# Fleet Configuration for Store Stack
+#
+# This file controls how Fleet deploys the store-stack to different clusters.
+# 
+# Values are layered in this order (later overrides earlier):
+#   1. values.yaml (defaults)
+#   2. versions/<release-version>.yaml (image tags per release)
+#   3. clusters/<cluster-name>.yaml (cluster-specific config)
+
+defaultNamespace: default
+
+helm:
+  releaseName: store-stack
+  
+  # Base values files (applied to all clusters)
+  values:
+    nginx-service:
+      replicaCount: 2
+
+# Per-cluster customizations
+# Each cluster gets its version-specific + cluster-specific values
+targetCustomizations:
+  # -------------------------------------------
+  # saurabh-kubernetes-cluster (Production)
+  # -------------------------------------------
+  - name: anakin-cluster
+    clusterSelector:
+      matchLabels:
+        management.cattle.io/cluster-display-name: anakin-cluster
+    #clusterName: saurabh-kubernetes-cluster
+    helm:
+      valuesFiles:
+        - ../../clusters/anakin-cluster.yaml
+        - versions/v1.5.0.yaml
+
+
+# Uncomment when you have infrastructure layer
+# dependsOn:
+#   - name: storage
+#   - name: networking
