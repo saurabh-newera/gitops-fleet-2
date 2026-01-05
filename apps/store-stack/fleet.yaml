@@ -13,8 +13,9 @@ helm:
   releaseName: store-stack
   
   # Base values files (applied to all clusters)
-  valuesFiles:
-    - values.yaml
+  values:
+    nginx-service:
+      replicaCount: 2
 
 # Per-cluster customizations
 # Each cluster gets its version-specific + cluster-specific values
@@ -29,10 +30,12 @@ targetCustomizations:
     #clusterName: saurabh-kubernetes-cluster
     helm:
       values:
-        resources:
-          limits:
-            cpu: "180m"
-            memory: "188Mi"
+        nginx-service:
+          replicaCount: 5
+          resources:
+            limits:
+              cpu: "180m"
+              memory: "188Mi"
 
 
 # Uncomment when you have infrastructure layer
