@@ -1,0 +1,58 @@
+# Fleet Configuration for Store Stack
+#
+# This file controls how Fleet deploys the store-stack to different clusters.
+# 
+# Values are layered in this order (later overrides earlier):
+#   1. values.yaml (defaults)
+#   2. versions/<release-version>.yaml (image tags per release)
+#   3. clusters/<cluster-name>.yaml (cluster-specific config)
+
+namespace: default
+
+helm:
+  releaseName: store-stack
+  
+  # Base values files (applied to all clusters)
+  valuesFiles:
+    - values.yaml
+
+# Per-cluster customizations
+# Each cluster gets its version-specific + cluster-specific values
+targetCustomizations:
+  # -------------------------------------------
+  # anakin-cluster (Production)
+  # -------------------------------------------
+  - name: anakin-cluster
+    clusterName: anakin-cluster
+    helm:
+      valuesFiles:
+        - values.yaml
+        - versions/${ .ClusterLabels.release-version }.yaml
+        - clusters/anakin-cluster.yaml
+
+  # -------------------------------------------
+  # anakin-cluster-2 (Pilot/Testing)
+  # -------------------------------------------
+  - name: anakin-cluster-2
+    clusterName: anakin-cluster-2
+    helm:
+      valuesFiles:
+        - values.yaml
+        - versions/${ .ClusterLabels.release-version }.yaml
+        - clusters/anakin-cluster-2.yaml
+
+  # -------------------------------------------
+  # saurabh-kubernetes-cluster (Production)
+  # -------------------------------------------
+  - name: saurabh-kubernetes-cluster
+    clusterName: saurabh-kubernetes-cluster
+    helm:
+      valuesFiles:
+        - values.yaml
+        - versions/v1.4.0.yaml
+        - clusters/saurabh-kubernetes-cluster.yaml
+
+# Uncomment when you have infrastructure layer
+# dependsOn:
+#   - name: storage
+#   - name: networking

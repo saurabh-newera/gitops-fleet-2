@@ -1,0 +1,67 @@
+# Default values for store-stack
+# These are baseline defaults - override in versions/*.yaml and clusters/*.yaml
+
+nginx-service:
+  namespace: default
+  replicaCount: 1
+  image:
+    repository: nginx
+    tag: "1.27.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: "100m"
+      memory: "128Mi"
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+  env:
+    APP_ENV: "production"
+
+httpbin-service:
+  namespace: default
+  replicaCount: 1
+  image:
+    repository: kennethreitz/httpbin
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30080
+  env:
+    APP_ENV: "production"
+    LOG_LEVEL: "info"
+
+redis-service:
+  namespace: default
+  replicaCount: 1
+  image:
+    repository: redis
+    tag: "7.2.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 6379
+  env:
+    REDIS_MAXMEMORY: "128mb"
+
+postgres:
+  namespace: default
+  replicaCount: 1
+  image:
+    repository: postgres
+    tag: "15.4"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5432
+  storage:
+    size: "10Gi"
+    storageClass: "standard"
+  config:
+    database: "appdb"
+    user: "appuser"

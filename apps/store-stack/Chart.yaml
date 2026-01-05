@@ -1,0 +1,23 @@
+# Umbrella Chart for Store Stack
+# This chart pulls in all service dependencies
+
+apiVersion: v2
+name: store-stack
+description: Store Stack - Complete application deployment
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: nginx-service
+    version: "0.1.0"
+    repository: "https://github.com/saurabh-newera/helm-charts/charts/nginx-service"
+    # Alternative: Use OCI registry or local file reference
+    # repository: "file://../../../helm-charts/charts/nginx-service"
+    
+  - name: httpbin-service
+    version: "0.1.0"
+    repository: "https://github.com/saurabh-newera/helm-charts/charts/httpbin-service"
+    
+  - name: redis-service
+    version: "0.1.0"
+    repository: "https://github.com/saurabh-newera/helm-charts/charts/redis-service"

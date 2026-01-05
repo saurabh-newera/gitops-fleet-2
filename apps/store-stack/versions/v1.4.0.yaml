@@ -1,0 +1,25 @@
+# Release v1.4.0 - Stable
+#
+# Image versions for release v1.4.0
+# This file contains ONLY version-specific settings (primarily image tags)
+# Cluster-specific config (replicas, IPs, resources) goes in clusters/*.yaml
+
+nginx-service:
+  image:
+    repository: nginx
+    tag: "1.27.0"
+
+httpbin-service:
+  image:
+    repository: kennethreitz/httpbin
+    tag: "latest"
+
+redis-service:
+  image:
+    repository: redis
+    tag: "7.2.0"
+
+postgres:
+  image:
+    repository: postgres
+    tag: "15.4"

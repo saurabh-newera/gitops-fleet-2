@@ -1,0 +1,59 @@
+# Cluster: anakin-cluster
+# Environment: Production
+# Release: Controlled by cluster label 'release-version'
+#
+# This file contains cluster-specific configuration ONLY.
+# Image tags are defined in versions/*.yaml
+
+# -------------------------------------------
+# NGINX Service
+# -------------------------------------------
+nginx-service:
+  replicaCount: 3
+  service:
+    type: LoadBalancer
+    loadBalancerIP: "10.200.20.1"
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+  env:
+    APP_ENV: "production"
+
+# -------------------------------------------
+# HTTPBIN Service
+# -------------------------------------------
+httpbin-service:
+  replicaCount: 2
+  service:
+    type: NodePort
+    nodePort: 30081
+  env:
+    APP_ENV: "production"
+    LOG_LEVEL: "info"
+
+# -------------------------------------------
+# Redis Service
+# -------------------------------------------
+redis-service:
+  replicaCount: 1
+  env:
+    REDIS_MAXMEMORY: "512mb"
+
+# -------------------------------------------
+# PostgreSQL
+# -------------------------------------------
+postgres:
+  replicaCount: 1
+  service:
+    type: LoadBalancer
+    loadBalancerIP: "10.200.20.2"
+  storage:
+    size: "50Gi"
+    storageClass: "longhorn"
+  config:
+    database: "anakin_prod"
+    user: "anakin_admin"

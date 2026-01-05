@@ -1,0 +1,54 @@
+# GitRepo: Store Stack
+#
+# This GitRepo deploys the store-stack application to all clusters.
+# The specific version (v1.4.0, v1.5.0, etc.) is determined by each cluster's
+# 'release-version' label.
+#
+# CLUSTER TARGETING:
+# - Clusters with label 'app-stack: store' will receive this deployment
+# - The version deployed depends on the cluster's 'release-version' label
+#
+# PROMOTION WORKFLOW:
+# To upgrade a cluster from v1.4.0 to v1.5.0:
+#   1. Change cluster label: release-version: "v1.4.0" → "v1.5.0"
+#   2. Fleet automatically deploys the new version
+#
+# REQUIRED CLUSTER LABELS:
+#   - release-version: "v1.4.0" or "v1.5.0" (determines which version to deploy)
+#   - (optional) app-stack: "store" (for targeting, if you have multiple app stacks)
+
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: store-stack
+  namespace: fleet-default
+spec:
+  # ===========================================
+  # SOURCE: Where to pull the deployment config from
+  # ===========================================
+  repo: https://github.com/saurabh-newera/gitops-fleet-2
+  branch: main
+  
+  # Path to the store-stack application
+  paths:
+    - apps/store-stack
+
+  # ===========================================
+  # TARGETS: Which clusters receive this deployment
+  # ===========================================
+  targets:
+    # Target all clusters that should run the store-stack
+    # You can add more specific targeting if needed
+    - name: all-store-stack-clusters
+      clusterSelector:
+        matchExpressions:
+          - key: release-version
+            operator: In
+            values:
+              - "v1.4.0"
+              - "v1.5.0"
+
+  # ===========================================
+  # POLLING INTERVAL
+  # ===========================================
+  pollingInterval: 30s

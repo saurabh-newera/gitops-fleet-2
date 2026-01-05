@@ -1,0 +1,31 @@
+# Release v1.5.0 - Pilot/Testing
+#
+# Image versions for release v1.5.0
+# This file contains ONLY version-specific settings (primarily image tags)
+# Cluster-specific config (replicas, IPs, resources) goes in clusters/*.yaml
+#
+# CHANGES from v1.4.0:
+#   - nginx: 1.27.0 → 1.28.0
+#   - httpbin: latest → 0.10.0 (pinned version)
+#   - redis: 7.2.0 → 7.4.0
+#   - postgres: 15.4 → 16.1
+
+nginx-service:
+  image:
+    repository: nginx
+    tag: "1.28.0"
+
+httpbin-service:
+  image:
+    repository: kennethreitz/httpbin
+    tag: "0.10.0"
+
+redis-service:
+  image:
+    repository: redis
+    tag: "7.4.0"
+
+postgres:
+  image:
+    repository: postgres
+    tag: "16.1"
