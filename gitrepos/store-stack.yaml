@@ -1,44 +1,68 @@
+# =============================================================================
 # GitRepo: Store Stack
+# =============================================================================
 #
-# This GitRepo deploys the store-stack application to all clusters.
-# The specific version (v1.4.0, v1.5.0, etc.) is determined by each cluster's
-# 'release-version' label.
+# WHAT IS THIS?
+# -------------
+# This is a GitRepo Custom Resource that tells Fleet where to find your
+# GitOps configuration. It's a ONE-TIME SETUP that connects Fleet to your
+# gitops-fleet repository.
 #
-# CLUSTER TARGETING:
-# - Clusters with label 'app-stack: store' will receive this deployment
-# - The version deployed depends on the cluster's 'release-version' label
+# HOW TO CREATE THIS ON RANCHER:
+# ------------------------------
+# Option 1: Via Rancher UI
+#   1. Go to Rancher Dashboard
+#   2. Navigate to: Continuous Delivery → Git Repos
+#   3. Select namespace: fleet-default
+#   4. Click "Create" and fill in the details below
 #
-# PROMOTION WORKFLOW:
-# To upgrade a cluster from v1.4.0 to v1.5.0:
-#   1. Change cluster label: release-version: "v1.4.0" → "v1.5.0"
-#   2. Fleet automatically deploys the new version
+# Option 2: Via kubectl (on the Rancher management cluster)
+#   kubectl apply -f store-stack.yaml
 #
-# REQUIRED CLUSTER LABELS:
-#   - release-version: "v1.4.0" or "v1.5.0" (determines which version to deploy)
-#   - (optional) app-stack: "store" (for targeting, if you have multiple app stacks)
+# WHAT HAPPENS AFTER CREATION?
+# ----------------------------
+# Fleet will:
+#   1. Clone the repository specified below
+#   2. Read the fleet.yaml in apps/store-stack/
+#   3. Build Bundles based on targetCustomizations
+#   4. Deploy to matching downstream clusters automatically
+#   5. Continuously sync changes (every 30s by default)
+#
+# FOR MORE DETAILS:
+# See README.md for the full GitOps architecture and value layering explanation
+#
+# =============================================================================
 
 apiVersion: fleet.cattle.io/v1alpha1
 kind: GitRepo
 metadata:
   name: store-stack
+  # fleet-default namespace is where GitRepos for downstream clusters live
   namespace: fleet-default
 spec:
   # ===========================================
   # SOURCE: Where to pull the deployment config from
   # ===========================================
+  # This points to your gitops-fleet repository (NOT the helm-charts repo)
+  # The gitops-fleet repo contains:
+  #   - fleet.yaml (targeting rules)
+  #   - values.yaml (base defaults)
+  #   - versions/*.yaml (release-specific image tags)
+  #   - clusters/*.yaml (per-cluster configurations)
   repo: https://github.com/saurabh-newera/gitops-fleet-2
   branch: main
   
-  # Path to the store-stack application
+  # Path within the repo to the application configuration
+  # Fleet will look for fleet.yaml in this directory
   paths:
     - apps/store-stack
 
   # ===========================================
   # TARGETS: Which clusters receive this deployment
   # ===========================================
+  # This provides an initial filter. Fine-grained targeting is done
+  # via targetCustomizations in fleet.yaml within the app directory.
   targets:
-    # Target all clusters that should run the store-stack
-    # You can add more specific targeting if needed
     - name: all-store-stack-clusters
       clusterSelector:
         matchExpressions:
@@ -51,4 +75,6 @@ spec:
   # ===========================================
   # POLLING INTERVAL
   # ===========================================
+  # How often Fleet checks for changes in the Git repository
+  # For edge deployments with 100s-1000s of clusters, 30s is a good balance
   pollingInterval: 30s
