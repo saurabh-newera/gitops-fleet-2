@@ -13,11 +13,11 @@ nginx-service:
     port: 80
   resources:
     limits:
-      cpu: "100m"
-      memory: "128Mi"
+      cpu: "150m"
+      memory: "158Mi"
     requests:
-      cpu: "50m"
-      memory: "64Mi"
+      cpu: "60m"
+      memory: "74Mi"
   env:
     APP_ENV: "production"
 
