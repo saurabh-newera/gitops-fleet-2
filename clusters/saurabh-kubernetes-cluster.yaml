@@ -15,11 +15,11 @@ nginx-service:
     loadBalancerIP: "10.100.10.1"
   resources:
     limits:
-      cpu: "310m"
-      memory: "376Mi"
+      cpu: "320m"
+      memory: "356Mi"
     requests:
-      cpu: "90m"
-      memory: "84Mi"
+      cpu: "95m"
+      memory: "94Mi"
   env:
     APP_ENV: "production"
 
