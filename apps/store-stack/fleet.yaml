@@ -13,11 +13,8 @@ helm:
   releaseName: store-stack
   
   # Base values files (applied to all clusters)
-  values:
-    resources:
-      limits:
-        cpu: "350m"
-        memory: "358Mi"
+  valuesFiles:
+    - values.yaml
 
 # Per-cluster customizations
 # Each cluster gets its version-specific + cluster-specific values
