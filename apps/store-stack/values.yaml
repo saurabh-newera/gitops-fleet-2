@@ -32,6 +32,13 @@ httpbin-service:
     type: NodePort
     port: 80
     nodePort: 30080
+  resources:
+    limits:
+      cpu: "140m"
+      memory: "148Mi"
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
   env:
     APP_ENV: "production"
     LOG_LEVEL: "info"
@@ -43,11 +50,18 @@ redis-service:
     repository: redis
     tag: "7.2.0"
     pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: "250m"
+      memory: "258Mi"
+    requests:
+      cpu: "100m"
+      memory: "174Mi"
   service:
     type: ClusterIP
     port: 6379
   env:
-    REDIS_MAXMEMORY: "128mb"
+    REDIS_MAXMEMORY: "228mb"
 
 postgres:
   namespace: default
