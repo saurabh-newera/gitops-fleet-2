@@ -29,13 +29,8 @@ targetCustomizations:
         management.cattle.io/cluster-display-name: saurabh-kubernetes-cluster
     #clusterName: saurabh-kubernetes-cluster
     helm:
-      values:
-        nginx-service:
-          replicaCount: 5
-          resources:
-            limits:
-              cpu: "180m"
-              memory: "188Mi"
+      valuesFiles:
+        - clusters/saurabh-kubernetes-cluster.yaml
 
 
 # Uncomment when you have infrastructure layer
