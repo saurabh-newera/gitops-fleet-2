@@ -25,10 +25,13 @@ targetCustomizations:
   - name: saurabh-kubernetes-cluster
     clusterName: saurabh-kubernetes-cluster
     helm:
-      valuesFiles:
-        - values.yaml
-        - versions/v1.4.0.yaml
-        - clusters/saurabh-kubernetes-cluster.yaml
+      values:
+        nginx-service:
+          resources:
+            limits:
+              cpu: "150m"
+              memory: "158Mi"
+
 
 # Uncomment when you have infrastructure layer
 # dependsOn:
