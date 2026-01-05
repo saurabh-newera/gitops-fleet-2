@@ -31,6 +31,7 @@ targetCustomizations:
     helm:
       valuesFiles:
         - clusters/saurabh-kubernetes-cluster.yaml
+        - versions/v1.4.0.yaml
 
 
 # Uncomment when you have infrastructure layer
