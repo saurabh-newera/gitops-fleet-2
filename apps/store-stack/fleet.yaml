@@ -7,7 +7,7 @@
 #   2. versions/<release-version>.yaml (image tags per release)
 #   3. clusters/<cluster-name>.yaml (cluster-specific config)
 
-namespace: default
+defaultNamespace: default
 
 helm:
   releaseName: store-stack
