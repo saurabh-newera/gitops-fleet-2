@@ -1,5 +1,5 @@
 # Umbrella Chart for Store Stack
-# This chart pulls in all service dependencies
+# This chart pulls in all service dependencies from published Helm repository
 
 apiVersion: v2
 name: store-stack
@@ -9,15 +9,17 @@ type: application
 
 dependencies:
   - name: nginx-service
-    version: "0.1.0"
-    repository: "https://github.com/saurabh-newera/helm-charts/charts/nginx-service"
-    # Alternative: Use OCI registry or local file reference
-    # repository: "file://../../../helm-charts/charts/nginx-service"
+    version: "0.3.0"
+    repository: "https://saurabh-newera.github.io/helm-charts"
     
   - name: httpbin-service
-    version: "0.1.0"
-    repository: "https://github.com/saurabh-newera/helm-charts/charts/httpbin-service"
+    version: "0.3.0"
+    repository: "https://saurabh-newera.github.io/helm-charts"
     
   - name: redis-service
-    version: "0.1.0"
-    repository: "https://github.com/saurabh-newera/helm-charts/charts/redis-service"
+    version: "0.3.0"
+    repository: "https://saurabh-newera.github.io/helm-charts"
+    
+  - name: postgres
+    version: "1.2.0"
+    repository: "https://saurabh-newera.github.io/helm-charts"
