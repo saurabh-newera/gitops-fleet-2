@@ -8,7 +8,6 @@
 #   3. clusters/<cluster-name>.yaml (cluster-specific config)
 
 defaultNamespace: default
-THIS_SHOULD_CAUSE_ERROR: true
 
 helm:
   releaseName: store-stack
@@ -27,11 +26,10 @@ targetCustomizations:
     clusterName: saurabh-kubernetes-cluster
     helm:
       values:
-        nginx-service:
-          resources:
-            limits:
-              cpu: "150m"
-              memory: "158Mi"
+        resources:
+          limits:
+            cpu: "150m"
+            memory: "158Mi"
 
 
 # Uncomment when you have infrastructure layer
