@@ -27,14 +27,15 @@ When managing a fleet of Kubernetes clusters, we need to solve several challenge
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         THE MULTI-CLUSTER CHALLENGE                     │
 │                                                                         │
-│   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌───────────┐  │
-│   │  Cluster A  │   │  Cluster B  │   │  Cluster C  │   │  Cluster  │  │
-│   │  (Prod-US)  │   │  (Prod-EU)  │   │  (Staging)  │   │     N     │  │
-│   │             │   │             │   │             │   │    ...    │  │
-│   │  3 replicas │   │  5 replicas │   │  1 replica  │   │           │  │
-│   │  8GB RAM    │   │  16GB RAM   │   │  2GB RAM    │   │           │  │
-│   │  IP: 10.1.x │   │  IP: 10.2.x │   │  IP: 10.3.x │   │           │  │
-│   └─────────────┘   └─────────────┘   └─────────────┘   └───────────┘  │
+│   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌────────┐  │
+│   │ edge-store-  │   │ edge-store-  │   │ edge-store-  │   │  ...   │  │
+│   │     001      │   │     002      │   │     010      │   │ 1000s  │  │
+│   │              │   │              │   │   (pilot)    │   │        │  │
+│   │  3 replicas  │   │  1 replica   │   │  2 replicas  │   │        │  │
+│   │  8GB RAM     │   │  512MB RAM   │   │  2GB RAM     │   │        │  │
+│   │  IP: 10.1.10 │   │  IP: 10.1.20 │   │  IP: 10.1.30 │   │        │  │
+│   │  v1.4.0      │   │  v1.4.0      │   │  v1.6.0      │   │        │  │
+│   └──────────────┘   └──────────────┘   └──────────────┘   └────────┘  │
 │                                                                         │
 │   SAME APPLICATION ──► DIFFERENT CONFIGURATIONS ──► CONTROLLED ROLLOUT │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -52,13 +53,20 @@ When managing a fleet of Kubernetes clusters, we need to solve several challenge
 ### Why GitOps for Edge at Scale?
 
 ```
-Commit to Git
-Fleet syncs all clusters
-Git history = audit log
-Guaranteed consistency
-git revert = instant
-Git blame = accountability
-Time to update 1000 clusters: Minutes (automatic sync)
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    EDGE CLUSTER MANAGEMENT AT SCALE                     │
+│                         GitOps Approach Benefits                        │
+│                                                                         │
+│   + Commit to Git - All changes version controlled                     │
+│   + Fleet syncs all clusters automatically                             │
+│   + Git history provides complete audit log                            │
+│   + Guaranteed consistency across all clusters                         │
+│   + Instant rollback with git revert                                   │
+│   + Full accountability via Git blame                                  │
+│                                                                         │
+│   Time to update 1000 clusters: Minutes (automatic sync)               │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Real-World Edge Scenarios:**
@@ -200,13 +208,17 @@ Real-world deployments require **layered configuration**. Not everything should 
 **The Merge Result:**
 
 ```yaml
-# Final values for prod-us cluster running v1.4.0:
-replicaCount: 5              # from clusters/prod-us.yaml
-loadBalancerIP: 10.1.1.1     # from clusters/prod-us.yaml
-storageClass: fast-ssd       # from clusters/prod-us.yaml
+# Final values for edge-store-001 running v1.4.0:
+replicaCount: 3              # from clusters/edge-store-001.yaml
+loadBalancerIP: 10.100.1.10  # from clusters/edge-store-001.yaml
+resources:
+  limits:
+    memory: 2Gi              # from clusters/edge-store-001.yaml
 image:
-  repository: nginx          # from values.yaml (base)
+  repository: nginx          # from Helm chart defaults
   tag: "1.27.0"              # from versions/v1.4.0.yaml
+env:
+  STORE_ID: "001"            # from clusters/edge-store-001.yaml
 ```
 
 ---
@@ -220,7 +232,7 @@ Every cluster is unique. Here's why one-size-fits-all doesn't work:
 │              WHY CLUSTERS NEED DIFFERENT CONFIGURATIONS                 │
 │                                                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │ 🖥️  HARDWARE CAPACITY                                           │   │
+│  │ HARDWARE CAPACITY                                                │   │
 │  │                                                                  │   │
 │  │  Production Cluster        │    Edge/Small Cluster              │   │
 │  │  • 5 replicas              │    • 1 replica                     │   │
@@ -229,7 +241,7 @@ Every cluster is unique. Here's why one-size-fits-all doesn't work:
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │ 🌐 NETWORK CONFIGURATION                                        │   │
+│  │ NETWORK CONFIGURATION                                            │   │
 │  │                                                                  │   │
 │  │  US Region                 │    EU Region                       │   │
 │  │  • LB IP: 10.100.1.x       │    • LB IP: 10.200.1.x             │   │
@@ -238,7 +250,7 @@ Every cluster is unique. Here's why one-size-fits-all doesn't work:
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │ 🏢 ENVIRONMENT DIFFERENCES                                      │   │
+│  │ ENVIRONMENT DIFFERENCES                                          │   │
 │  │                                                                  │   │
 │  │  Production                │    Staging                         │   │
 │  │  • LOG_LEVEL: warn         │    • LOG_LEVEL: debug              │   │
@@ -247,7 +259,7 @@ Every cluster is unique. Here's why one-size-fits-all doesn't work:
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │ 👥 CUSTOMER/TENANT REQUIREMENTS                                 │   │
+│  │ CUSTOMER/TENANT REQUIREMENTS                                     │   │
 │  │                                                                  │   │
 │  │  Customer A                │    Customer B                      │   │
 │  │  • Storage: 100GB          │    • Storage: 500GB                │   │
@@ -262,118 +274,159 @@ Every cluster is unique. Here's why one-size-fits-all doesn't work:
 ## Repository Structure
 
 ```
-gitops-fleet/
+gitops-fleet-2/
 │
-├── apps/
-│   └── store-stack/                    # Application bundle
-│       │
-│       ├── Chart.yaml                  # Umbrella chart (pulls published Helm charts)
-│       ├── values.yaml                 # Base defaults for all clusters
-│       ├── fleet.yaml                  # Fleet targeting & customization rules
-│       │
-│       ├── versions/                   # Release-specific configurations
-│       │   ├── v1.4.0.yaml             # Stable release image tags
-│       │   ├── v1.5.0.yaml             # New release image tags
-│       │   └── v1.6.0.yaml             # Future release
-│       │
-│       └── clusters/                   # Per-cluster configurations
-│           ├── prod-us-cluster.yaml    # Production US settings
-│           ├── prod-eu-cluster.yaml    # Production EU settings
-│           ├── staging-cluster.yaml    # Staging environment
-│           └── pilot-cluster.yaml      # Pilot/canary cluster
+├── clusters/                           # Per-cluster configurations (shared)
+│   ├── edge-store-001.yaml             # Store 001 specific settings
+│   ├── edge-store-002.yaml             # Store 002 specific settings
+│   ├── edge-store-010.yaml             # Pilot store settings
+│   └── ... (100s-1000s of files)
 │
-└── README.md
+└── apps/
+    ├── store-stack-v1.4/               # Version 1.4 (stable)
+    │   ├── Chart.yaml                  # Helm chart deps (nginx 0.2.0, redis 0.2.0)
+    │   ├── fleet.yaml                  # Lists clusters on v1.4
+    │   └── versions/
+    │       └── v1.4.0.yaml             # Image tags for v1.4
+    │
+    ├── store-stack-v1.5/               # Version 1.5
+    │   ├── Chart.yaml                  # Helm chart deps (nginx 0.3.0, redis 0.3.0)
+    │   ├── fleet.yaml                  # Lists clusters on v1.5
+    │   └── versions/
+    │       └── v1.5.0.yaml             # Image tags for v1.5
+    │
+    └── store-stack-v1.6/               # Version 1.6 (latest/pilot)
+        ├── Chart.yaml                  # Helm chart deps (nginx 0.4.0, redis 0.4.0)
+        ├── fleet.yaml                  # Lists clusters on v1.6
+        └── versions/
+            └── v1.6.0.yaml             # Image tags for v1.6
 ```
 
-**How It Helps:**
+### Key Concepts:
 
-| Directory | Purpose | Benefit |
-|-----------|---------|---------|
-| `versions/` | Image tags per release | Change versions without touching cluster configs |
-| `clusters/` | Per-cluster settings | Each cluster's unique needs in one place |
-| `fleet.yaml` | Targeting rules | Control which cluster gets which configuration |
+| Directory/File | Purpose | Shared Across Versions? |
+|----------------|---------|-------------------------|
+| clusters/*.yaml | Per-cluster config (resources, IPs, store IDs) | Yes - reused by all versions |
+| apps/store-stack-vX.X/ | Version-specific application bundle | No - isolated per version |
+| versions/*.yaml | Image tags for a release | No - specific to version |
+| Chart.yaml | Helm chart dependencies | No - different charts per version |
+| fleet.yaml | Which clusters run this version | No - different per version |
 
 ---
 
 ## Release Train: Upgrade Strategy
 
-Upgrading applications across multiple clusters requires a controlled approach. Here's our release train model:
+Upgrading applications across multiple edge clusters requires isolation and controlled rollouts. Our version-based approach provides complete separation between releases.
+
+### Version Isolation Strategy
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    VERSION ISOLATION ARCHITECTURE                       │
+│                                                                         │
+│   Each version gets its own folder with:                                │
+│   • Separate Chart.yaml (different Helm chart versions)                 │
+│   • Separate fleet.yaml (different cluster assignments)                 │
+│   • Separate versions/*.yaml (different image tags)                     │
+│                                                                         │
+│   Shared across all versions:                                           │
+│   • clusters/*.yaml (cluster-specific configs reused)                   │
+│                                                                         │
+│   ┌───────────────────┐   ┌───────────────────┐   ┌─────────────────┐ │
+│   │ store-stack-v1.4  │   │ store-stack-v1.5  │   │ store-stack-v1.6│ │
+│   │                   │   │                   │   │                 │ │
+│   │ Chart: nginx 0.2.0│   │ Chart: nginx 0.3.0│   │ Chart: nginx 0.4│ │
+│   │ Images: 1.27.0    │   │ Images: 1.28.0    │   │ Images: 1.29.0  │ │
+│   │                   │   │                   │   │                 │ │
+│   │ Clusters:         │   │ Clusters:         │   │ Clusters:       │ │
+│   │ • edge-store-001  │   │ • edge-store-005  │   │ • edge-store-010│ │
+│   │ • edge-store-002  │   │ • edge-store-006  │   │   (pilot)       │ │
+│   │ • edge-store-003  │   │                   │   │                 │ │
+│   │ • ... (900+)      │   │                   │   │                 │ │
+│   └───────────────────┘   └───────────────────┘   └─────────────────┘ │
+│            │                       │                       │            │
+│            └───────────────────────┴───────────────────────┘            │
+│                                    │                                    │
+│                          All use same cluster configs:                  │
+│                          clusters/edge-store-001.yaml                   │
+│                          clusters/edge-store-002.yaml                   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Upgrade Workflow
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                      RELEASE TRAIN WORKFLOW                             │
 │                                                                         │
-│   STEP 1: CI Creates Version File                                       │
-│   ════════════════════════════════                                      │
+│   STEP 1: App Team Releases New Helm Charts                            │
+│   ════════════════════════════════════════════                         │
 │                                                                         │
-│   Git Tag: v1.6.0                                                       │
-│        │                                                                │
-│        ▼                                                                │
-│   ┌─────────────┐     Creates      ┌─────────────────────────────┐     │
-│   │ CI Pipeline │ ───────────────► │ versions/v1.6.0.yaml        │     │
-│   └─────────────┘                  │                             │     │
-│                                    │ nginx-service:              │     │
-│                                    │   image:                    │     │
-│                                    │     tag: "1.29.0"           │     │
-│                                    │ redis-service:              │     │
-│                                    │   image:                    │     │
-│                                    │     tag: "7.4.0"            │     │
-│                                    └─────────────────────────────┘     │
+│   • Publishes nginx-service 0.4.0, redis-service 0.4.0 to GitHub Pages │
+│   • New Docker images: nginx:1.29.0, redis:7.5.0                       │
 │                                                                         │
-│   STEP 2: Deploy to Pilot Clusters (Manual/DevOps)                     │
-│   ════════════════════════════════════════════════                     │
+│   STEP 2: Platform Team Creates v1.6 Folder                            │
+│   ════════════════════════════════════════════                         │
 │                                                                         │
-│   ┌─────────────────────────────────────────────────────────────────┐  │
-│   │ fleet.yaml                                                      │  │
-│   │                                                                 │  │
-│   │ targetCustomizations:                                           │  │
-│   │   - name: pilot-cluster           # ◄── Updated to v1.6.0      │  │
-│   │     clusterSelector: ...                                        │  │
-│   │     helm:                                                       │  │
-│   │       valuesFiles:                                              │  │
-│   │         - versions/v1.6.0.yaml    # ◄── NEW VERSION            │  │
-│   │         - clusters/pilot.yaml                                   │  │
-│   │                                                                 │  │
-│   │   - name: prod-clusters           # Still on v1.5.0            │  │
-│   │     helm:                                                       │  │
-│   │       valuesFiles:                                              │  │
-│   │         - versions/v1.5.0.yaml    # ◄── UNCHANGED              │  │
-│   └─────────────────────────────────────────────────────────────────┘  │
+│   mkdir apps/store-stack-v1.6                                           │
+│   • Create Chart.yaml with chart version 0.4.0 dependencies             │
+│   • Create versions/v1.6.0.yaml with image tags                         │
+│   • Create fleet.yaml listing pilot cluster only                        │
+│   • Create GitRepo CRD pointing to store-stack-v1.6                     │
 │                                                                         │
-│   STEP 3: Validate & Test                                              │
+│   STEP 3: Deploy to Pilot (Automatic)                                  │
+│   ════════════════════════════════════                                 │
+│                                                                         │
+│   # apps/store-stack-v1.6/fleet.yaml                                    │
+│   targetCustomizations:                                                 │
+│     - name: edge-store-010                                              │
+│       helm:                                                             │
+│         valuesFiles:                                                    │
+│           - versions/v1.6.0.yaml         # New image tags              │
+│           - ../../clusters/edge-store-010.yaml  # Same cluster config  │
+│                                                                         │
+│   Fleet deploys v1.6 to edge-store-010 within 30 seconds                │
+│                                                                         │
+│                                                                         │
+│   STEP 4: Validate on Pilot                                            │
 │   ═══════════════════════                                              │
 │                                                                         │
-│   ┌────────────────┐                                                   │
-│   │ Pilot Cluster  │ ◄── Running v1.6.0                               │
-│   │                │                                                   │
-│   │ ✓ Health checks│                                                   │
-│   │ ✓ Smoke tests  │                                                   │
-│   │ ✓ Customer UAT │                                                   │
-│   └────────────────┘                                                   │
+│   • Health checks, smoke tests, customer UAT                            │
+│   • Monitor for 2-3 days                                                │
 │                                                                         │
-│   STEP 4: Gradual Rollout (CI or DevOps)                               │
-│   ══════════════════════════════════════                               │
+│   STEP 5: Gradual Migration (Manual)                                   │
+│   ════════════════════════════════                                     │
 │                                                                         │
-│   ┌─────────────────────────────────────────────────────────────────┐  │
-│   │                                                                 │  │
-│   │  Week 1:  pilot-cluster ──────► v1.6.0                          │  │
-│   │                                                                 │  │
-│   │  Week 2:  staging-cluster ────► v1.6.0                          │  │
-│   │                                                                 │  │
-│   │  Week 3:  prod-eu-cluster ────► v1.6.0                          │  │
-│   │                                                                 │  │
-│   │  Week 4:  prod-us-cluster ────► v1.6.0                          │  │
-│   │                                                                 │  │
-│   └─────────────────────────────────────────────────────────────────┘  │
+│   Week 2: Migrate 5-10 stores                                           │
+│   • Remove from apps/store-stack-v1.4/fleet.yaml                        │
+│   • Add to apps/store-stack-v1.6/fleet.yaml                             │
+│                                                                         │
+│   # apps/store-stack-v1.4/fleet.yaml (REMOVE)                           │
+│   targetCustomizations:                                                 │
+│     - name: edge-store-001                                              │
+│     - name: edge-store-002                                              │
+│     # edge-store-003 REMOVED ◄──                                        │
+│                                                                         │
+│   # apps/store-stack-v1.6/fleet.yaml (ADD)                              │
+│   targetCustomizations:                                                 │
+│     - name: edge-store-010  # pilot                                     │
+│     - name: edge-store-003  # ◄── ADDED                                 │
+│       helm:                                                             │
+│         valuesFiles:                                                    │
+│           - versions/v1.6.0.yaml                                        │
+│           - ../../clusters/edge-store-003.yaml  # Same config!          │
+│                                                                         │
+│   Week 3-12: Continue batch migrations                                  │
+│   • 10-50 stores per week                                               │
+│   • Monitor after each batch                                            │
 │                                                                         │
 │   ROLLBACK (If Issues Found)                                           │
 │   ══════════════════════════                                           │
 │                                                                         │
-│   Simply revert the valuesFiles reference:                             │
-│                                                                         │
-│   versions/v1.6.0.yaml  ──►  versions/v1.5.0.yaml                      │
-│                                                                         │
-│   Commit & push. Fleet automatically rolls back.                       │
+│   Move cluster back from v1.6 to v1.4:                                 │
+│   • Remove from apps/store-stack-v1.6/fleet.yaml                        │
+│   • Add back to apps/store-stack-v1.4/fleet.yaml                        │
+│   • Commit & push → Fleet redeploys v1.4 automatically                  │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -422,32 +475,44 @@ Upgrading applications across multiple clusters requires a controlled approach. 
 
 ### Setup Steps
 
-#### 1. Create GitRepo in Fleet (Required)
+#### 1. Create GitRepo Resources in Fleet (Required)
 
-Before Fleet can deploy anything, you must create a `GitRepo` resource that tells Fleet where to find your configuration. This is a **one-time setup** that points Fleet to your gitops-fleet repository:
+Before Fleet can deploy anything, you must create `GitRepo` resources for each version. Each version gets its own GitRepo pointing to its folder:
 
 ```yaml
+# gitrepos/store-stack-v1.4.yaml
 apiVersion: fleet.cattle.io/v1alpha1
 kind: GitRepo
 metadata:
-  name: store-stack
+  name: store-stack-v1.4
   namespace: fleet-default
 spec:
-  repo: https://github.com/your-org/gitops-fleet
+  repo: https://github.com/your-org/gitops-fleet-2
   branch: main
   paths:
-    - apps/store-stack
-  targets:
-    - name: all-clusters
-      clusterSelector:
-        matchLabels:
-          environment: production
+    - apps/store-stack-v1.4
+  pollingInterval: 30s
+```
+
+```yaml
+# gitrepos/store-stack-v1.6.yaml
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: store-stack-v1.6
+  namespace: fleet-default
+spec:
+  repo: https://github.com/your-org/gitops-fleet-2
+  branch: main
+  paths:
+    - apps/store-stack-v1.6
+  pollingInterval: 15s      # Faster sync for pilot testing
 ```
 
 #### 2. Configure Cluster Targeting in fleet.yaml
 
 ```yaml
-# apps/store-stack/fleet.yaml
+# apps/store-stack-v1.4/fleet.yaml
 
 defaultNamespace: default
 
@@ -455,62 +520,109 @@ helm:
   releaseName: store-stack
 
 targetCustomizations:
-  - name: prod-us-cluster
+  - name: edge-store-001
     clusterSelector:
       matchLabels:
-        management.cattle.io/cluster-display-name: prod-us-cluster
+        management.cattle.io/cluster-display-name: edge-store-001
     helm:
       valuesFiles:
-        - values.yaml
         - versions/v1.4.0.yaml
-        - clusters/prod-us-cluster.yaml
+        - ../../clusters/edge-store-001.yaml
 
-  - name: pilot-cluster
+  - name: edge-store-002
     clusterSelector:
       matchLabels:
-        management.cattle.io/cluster-display-name: pilot-cluster
+        management.cattle.io/cluster-display-name: edge-store-002
     helm:
       valuesFiles:
-        - values.yaml
-        - versions/v1.5.0.yaml
-        - clusters/pilot-cluster.yaml
+        - versions/v1.4.0.yaml
+        - ../../clusters/edge-store-002.yaml
+  
+  # ... more clusters on v1.4
+```
+
+```yaml
+# apps/store-stack-v1.6/fleet.yaml
+
+defaultNamespace: default
+
+helm:
+  releaseName: store-stack
+
+targetCustomizations:
+  - name: edge-store-010
+    clusterSelector:
+      matchLabels:
+        management.cattle.io/cluster-display-name: edge-store-010
+    helm:
+      valuesFiles:
+        - versions/v1.6.0.yaml
+        - ../../clusters/edge-store-010.yaml
 ```
 
 #### 3. Define Your Value Layers
 
-**Base defaults (`values.yaml`):**
+**Version-specific (`apps/store-stack-v1.4/versions/v1.4.0.yaml`):**
 ```yaml
 nginx-service:
-  replicaCount: 1
   image:
     repository: nginx
-    tag: "latest"
-  service:
-    type: ClusterIP
-```
-
-**Version-specific (`versions/v1.4.0.yaml`):**
-```yaml
-nginx-service:
-  image:
     tag: "1.27.0"
+
+httpbin-service:
+  image:
+    tag: "latest"
 
 redis-service:
   image:
     tag: "7.2.0"
+
+postgres:
+  image:
+    tag: "15.4"
 ```
 
-**Cluster-specific (`clusters/prod-us-cluster.yaml`):**
+**Cluster-specific (`clusters/edge-store-001.yaml`):**
 ```yaml
 nginx-service:
-  replicaCount: 5
+  replicaCount: 3
   service:
     type: LoadBalancer
-    loadBalancerIP: "10.100.10.1"
+    loadBalancerIP: "10.100.1.10"
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+  env:
+    - name: STORE_ID
+      value: "001"
+    - name: REGION
+      value: "us-east"
+
+postgres:
+  persistence:
+    size: "100Gi"
+    storageClass: "fast-ssd"
+```
+
+**Small edge cluster (`clusters/edge-store-002.yaml`):**
+```yaml
+nginx-service:
+  replicaCount: 1              # Smaller store
+  service:
+    type: LoadBalancer
+    loadBalancerIP: "10.100.1.20"
   resources:
     limits:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "512Mi"           # Less RAM
+  env:
+    - name: STORE_ID
+      value: "002"
+
+postgres:
+  persistence:
+    size: "50Gi"                # Less storage
 ```
 
 ---
