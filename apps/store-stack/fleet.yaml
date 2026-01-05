@@ -8,6 +8,7 @@
 #   3. clusters/<cluster-name>.yaml (cluster-specific config)
 
 defaultNamespace: default
+THIS_SHOULD_CAUSE_ERROR: true
 
 helm:
   releaseName: store-stack
