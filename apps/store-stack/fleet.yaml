@@ -24,10 +24,10 @@ targetCustomizations:
         management.cattle.io/cluster-display-name: saurabh-kubernetes-cluster
     #clusterName: saurabh-kubernetes-cluster
     helm:
-      version: 1.4.0
+      version: 1.5.0
       valuesFiles:
         - ../../clusters/saurabh-kubernetes-cluster.yaml
-        - versions/v1.4.0.yaml
+        - versions/v1.5.0.yaml
 
 
 # Uncomment when you have infrastructure layer
