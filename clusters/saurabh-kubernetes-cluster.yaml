@@ -11,7 +11,7 @@
 nginx-service:
   replicaCount: 2
   service:
-    type: LoadBalancer
+    type: ClusterIP
     loadBalancerIP: "10.100.10.1"
   resources:
     limits:
