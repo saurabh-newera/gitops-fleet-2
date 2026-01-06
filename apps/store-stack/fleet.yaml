@@ -8,30 +8,26 @@
 #   3. clusters/<cluster-name>.yaml (cluster-specific config)
 
 defaultNamespace: default
-
 helm:
-  releaseName: store-stack
+  repo: https://saurabh-newera.github.io/helm-charts
+  chart: store-stack
   
-  # Base values files (applied to all clusters)
-  values:
-    nginx-service:
-      replicaCount: 2
-
 # Per-cluster customizations
 # Each cluster gets its version-specific + cluster-specific values
 targetCustomizations:
   # -------------------------------------------
   # saurabh-kubernetes-cluster (Production)
   # -------------------------------------------
-  - name: anakin-cluster
+  - name: saurabh-kubernetes-cluster
     clusterSelector:
       matchLabels:
-        management.cattle.io/cluster-display-name: anakin-cluster
+        management.cattle.io/cluster-display-name: saurabh-kubernetes-cluster
     #clusterName: saurabh-kubernetes-cluster
     helm:
+      version: 1.4.0
       valuesFiles:
-        - ../../clusters/anakin-cluster.yaml
-        - versions/v1.5.0.yaml
+        - ../../clusters/saurabh-kubernetes-cluster.yaml
+        - versions/v1.4.0.yaml
 
 
 # Uncomment when you have infrastructure layer
